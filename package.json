@@ -1,0 +1,14 @@
+{
+  "name": "difftyper",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Delega la generación a la IA, asimila la lógica con tus propias manos.",
+  "workspaces": ["app"],
+  "scripts": {
+    "dev": "npm run dev --workspace @difftyper/app",
+    "build": "npm run build --workspace @difftyper/app",
+    "preview": "npm run preview --workspace @difftyper/app",
+    "difftyper": "node cli/index.js"
+  },
+  "engines": { "node": ">=18" }
+}

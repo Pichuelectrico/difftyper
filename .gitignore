@@ -1,0 +1,19 @@
+# Dependencias y build (regenerables)
+node_modules/
+dist/
+
+# Estado local de DiffTyper
+.difftyper/
+*.log
+
+# SO/junk
+.DS_Store
+
+# Docs internas del equipo (no públicas; README.md es la doc pública)
+CONTRACTS.md
+context.md
+plan.md
+
+# Tooling interno de skills de IA
+.agents/
+app/skills-lock.json
