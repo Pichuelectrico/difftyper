@@ -1,6 +1,6 @@
 # DiffTyper
 
-> **Eslogan:** Delega la generación a la IA, asimila la lógica con tus propias manos.
+> Delega la generación a la IA, asimila la lógica con tus propias manos.
 
 ## Motivación
 
