@@ -84,7 +84,7 @@ npm run build -w app
 
 ## Licencia
 
-**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — Creative Commons Atribución 4.0 Internacional · © Pichuelectrico
+**[GPL v3](https://www.gnu.org/licenses/gpl-3.0.html)** — GNU General Public License 3.0 · © Pichuelectrico
 
-Si usas, remixas o haces un **fork** de este proyecto, estás obligado a **dar el crédito correspondiente**: referencia el repositorio original ([github.com/Pichuelectrico/difftyper](https://github.com/Pichuelectrico/difftyper)) e indica los cambios que hiciste. Ese crédito es la condición de la licencia. 🙌
+Licencia **copyleft**: si usas o haces un **fork** de este proyecto, tus cambios **deben publicarse bajo la misma GPL v3** (los forks no pueden cerrarse) y los **avisos de copyright del original se conservan** — el crédito a [github.com/Pichuelectrico/difftyper](https://github.com/Pichuelectrico/difftyper) permanece en todo fork. 🙌
 
