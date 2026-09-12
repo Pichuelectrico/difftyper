@@ -81,3 +81,10 @@ npm run dev -w app
 # O compilar la webapp para producción
 npm run build -w app
 ```
+
+## Licencia
+
+**[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)** — Creative Commons Atribución 4.0 Internacional · © Pichuelectrico
+
+Si usas, remixas o haces un **fork** de este proyecto, estás obligado a **dar el crédito correspondiente**: referencia el repositorio original ([github.com/Pichuelectrico/difftyper](https://github.com/Pichuelectrico/difftyper)) e indica los cambios que hiciste. Ese crédito es la condición de la licencia. 🙌
+
