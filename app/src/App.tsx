@@ -8,6 +8,7 @@ import { isFileSystemAccessSupported, pickWorkspace, scanForDiffs, readDiffText,
 import type { ParsedDiff } from "./lib/types";
 import SettingsPanel from "./components/SettingsPanel";
 import HowToUse from "./components/HowToUse";
+import Footer, { GitHubIcon } from "./components/Footer";
 
 export default function App() {
   const [screen, setScreen] = useState<"landing" | "empty" | "list" | "practice">("landing");
@@ -108,6 +109,16 @@ export default function App() {
           <button type="button" className="btn btn-secondary" onClick={() => setSettingsOpen(true)}>
             <span aria-hidden="true">⚙️</span> Configuración
           </button>
+          <a
+            href="https://github.com/Pichuelectrico/difftyper"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-ghost header-github-link"
+            aria-label="Ver repositorio de DiffTyper en GitHub"
+            title="Ver repositorio en GitHub"
+          >
+            <GitHubIcon />
+          </a>
         </div>
       </header>
       {status && <div className="banner" role="status">{status}</div>}
@@ -122,6 +133,7 @@ export default function App() {
         };
         return renderScreen();
       })()}
+      <Footer />
       <SettingsPanel open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <HowToUse open={helpOpen} onClose={() => setHelpOpen(false)} />
       <button

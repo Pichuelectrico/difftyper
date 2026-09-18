@@ -93,6 +93,53 @@ body::before {
   margin-left: auto;
 }
 
+/* D22: enlace de GitHub en el header */
+.header-github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 10px;
+  color: var(--dim);
+  text-decoration: none;
+}
+.header-github-link svg { width: 20px; height: 20px; }
+.header-github-link:hover { color: var(--accent); }
+
+/* D22: footer con links de contacto */
+.app-footer {
+  border-top: 1px solid var(--border);
+  margin-top: 48px;
+  padding: 32px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+.footer-copyright { font-size: 13px; color: var(--dim); }
+.footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 24px;
+}
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--dim);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.footer-link svg { width: 18px; height: 18px; flex-shrink: 0; transition: transform 0.2s ease; }
+.footer-link .ext-icon { width: 12px; height: 12px; opacity: 0.6; }
+.footer-link .footer-emoji { font-size: 1.1rem; line-height: 1; }
+.footer-link:hover { color: var(--accent); }
+.footer-link:hover svg { transform: scale(1.1); }
+.footer-made { font-size: 13px; font-weight: 500; color: var(--text); }
+
 .logo {
   color: var(--accent);
   font-weight: 700;
