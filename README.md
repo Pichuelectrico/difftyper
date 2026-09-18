@@ -10,6 +10,12 @@ Hoy la IA acelera muchísimo el desarrollo, pero también puede hacer que dejemo
 
 La aplicación convierte los cambios generados por la IA en un entorno interactivo donde puedes reescribirlos, entender cada línea y recibir explicaciones contextualizadas sobre qué hace y por qué existe. No se trata de competir con la IA, sino de reconectar con el código y validar que realmente entiendes lo que estás construyendo.
 
+## Demo en línea (GitHub Pages)
+
+La webapp está desplegada en **[https://pichuelectrico.github.io/difftyper/](https://pichuelectrico.github.io/difftyper/)** (deploy automático con GitHub Actions en cada push a `main`).
+
+La app es **100% local**: no guarda ni envía información de nadie — todo el procesamiento es client-side y los datos (workspace, endpoints, progreso) viven solo en tu navegador. Requiere **Chrome o Edge** (File System Access API). El CLI sí necesita correr local en tu repo (ver Instalación abajo).
+
 ## ¿Qué es?
 
 **DiffTyper** es un entorno interactivo de aprendizaje y práctica de código que transforma las diferencias de Git (`git diff`) en desafíos de mecanografía guiados por contexto. La plataforma permite a los desarrolladores asimilar activamente los cambios generados por agentes de IA o colaboradores, combinando la retroalimentación en tiempo real de aplicaciones de tecleo rápido con explicaciones semánticas línea por línea.
