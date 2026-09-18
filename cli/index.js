@@ -47,15 +47,70 @@ function ensureGitignoreEntry() {
   }
 }
 
+// D23: archivos de ruido que nadie quiere tipear (lockfiles, configs, .gitignore, node_modules…)
+const NOISE_FILENAMES = new Set([
+  '.gitignore', '.gitattributes', '.editorconfig', '.npmrc', '.nvmrc', '.DS_Store',
+  'package-lock.json', 'npm-shrinkwrap.json', 'yarn.lock', 'pnpm-lock.yaml', 'bun.lockb',
+  'tsconfig.tsbuildinfo', '.eslintcache',
+]);
+const NOISE_DIR_RE = /(^|\/)(node_modules|dist|coverage)\//;
+
+function isNoisePath(p) {
+  if (!p) return false;
+  const clean = p.replace(/^[ab]\//, '');
+  if (!clean) return false;
+  const base = clean.split('/').pop();
+  if (NOISE_FILENAMES.has(base)) return true;
+  if (base === '.env' || base.startsWith('.env.')) return true;
+  if (NOISE_DIR_RE.test(clean + '/')) return true;
+  return false;
+}
+
+function extractDiffPaths(headerLine) {
+  const m = headerLine.match(/^diff --git a\/(.+?) b\/(.+)$/);
+  return m ? [m[1], m[2]] : [];
+}
+
+// Divide el diff en chunks por archivo y descarta los que sean de ruido
+function filterNoiseFiles(diff) {
+  if (!diff) return diff;
+  const chunks = [];
+  let preamble = [];
+  let current = null;
+  for (const line of diff.split('\n')) {
+    if (line.startsWith('diff --git ')) {
+      if (current) chunks.push(current);
+      current = [line];
+    } else if (current) {
+      current.push(line);
+    } else {
+      preamble.push(line);
+    }
+  }
+  if (current) chunks.push(current);
+  const kept = chunks.filter((c) => {
+    const paths = extractDiffPaths(c[0]);
+    if (paths.length === 0) return true; // chunk sin header (tolerante)
+    return !paths.some(isNoisePath);     // con renames, filtra si a o b es ruido
+  });
+  const preambleText = preamble.length ? preamble.join('\n') + '\n' : '';
+  return preambleText + kept.map((c) => c.join('\n')).join('\n');
+}
+
 function saveDiff(diff) {
   const existed = existsSync('.difftyper');
-  if (!diff.trim()) {
-    console.log(`${YELLOW}⚠ El diff está vacío. Nada que practicar.${RESET}`);
+  const cleaned = filterNoiseFiles(diff);
+  if (!cleaned.trim()) {
+    if (diff.trim()) {
+      console.log(`${YELLOW}⚠ El diff solo contiene archivos de ruido (lockfiles, .gitignore, node_modules…). Nada que practicar.${RESET}`);
+    } else {
+      console.log(`${YELLOW}⚠ El diff está vacío. Nada que practicar.${RESET}`);
+    }
     process.exit(0);
   }
   mkdirSync('.difftyper', { recursive: true });
-  writeFileSync('.difftyper/changes.diff', diff);
-  const lines = diff.split('\n');
+  writeFileSync('.difftyper/changes.diff', cleaned);
+  const lines = cleaned.split('\n');
   let archivos = 0, hunks = 0, a = 0, d = 0;
   for (const line of lines) {
     if (line.startsWith('diff --git ')) archivos++;
