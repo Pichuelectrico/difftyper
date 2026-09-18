@@ -14,15 +14,30 @@ interface Props {
   onClose: () => void;
 }
 
+/** true si la URL es http:// y el host no es localhost/127.0.0.1 */
+function needsHttpWarning(baseUrl: string): boolean {
+  const t = baseUrl.trim().toLowerCase();
+  if (!t.startsWith("http://")) return false;
+  try {
+    const u = new URL(t);
+    return u.hostname !== "localhost" && u.hostname !== "127.0.0.1";
+  } catch {
+    return !t.includes("localhost") && !t.includes("127.0.0.1");
+  }
+}
+
 export default function SettingsPanel({ open, onClose }: Props) {
   const [endpoints, setEndpoints] = useState<TutorEndpoint[]>(() => loadEndpoints());
   const [activeId, setActiveId] = useState<string | null>(() => loadActiveEndpointId());
   const [form, setForm] = useState({ name: "", baseUrl: "", apiKey: "", model: "" });
   const [editId, setEditId] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [savedError, setSavedError] = useState<string | null>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (!open) return;
+    setEndpoints(loadEndpoints());
+    setActiveId(loadActiveEndpointId());
     firstInputRef.current?.focus();
     const h = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", h);
@@ -31,13 +46,18 @@ export default function SettingsPanel({ open, onClose }: Props) {
 
   if (!open) return null;
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setSavedError(null);
+    const existing = editId ? endpoints.find((e) => e.id === editId) : undefined;
+    const apiKey = form.apiKey;
     const ep: TutorEndpoint = {
       id: editId ?? makeEndpointId(),
       name: form.name,
       baseUrl: normalizeBaseUrl(form.baseUrl),
-      apiKey: form.apiKey,
+      apiKey,
       model: form.model,
+      // Si se edita y la clave queda vacía, conservar la existente vía hasKey
+      hasKey: apiKey.trim() !== "" ? true : Boolean(existing?.hasKey),
     };
     let next: TutorEndpoint[];
     if (editId) {
@@ -45,15 +65,19 @@ export default function SettingsPanel({ open, onClose }: Props) {
     } else {
       next = [...endpoints, ep];
     }
-    saveEndpoints(next);
-    setEndpoints(next);
-    // seleccionar el guardado
-    saveActiveEndpointId(ep.id);
-    setActiveId(ep.id);
-    setEditId(null);
-    setForm({ name: "", baseUrl: "", apiKey: "", model: "" });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      await saveEndpoints(next);
+      setEndpoints(loadEndpoints());
+      // seleccionar el guardado
+      saveActiveEndpointId(ep.id);
+      setActiveId(ep.id);
+      setEditId(null);
+      setForm({ name: "", baseUrl: "", apiKey: "", model: "" });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch {
+      setSavedError("No se pudo cifrar o guardar la API key. Inténtalo de nuevo.");
+    }
   };
 
   const handleSelect = (id: string) => {
@@ -63,20 +87,27 @@ export default function SettingsPanel({ open, onClose }: Props) {
 
   const handleEdit = (ep: TutorEndpoint) => {
     setEditId(ep.id);
-    setForm({ name: ep.name, baseUrl: ep.baseUrl, apiKey: ep.apiKey, model: ep.model });
+    // Campo apiKey vacío: conservar clave si el usuario no escribe nada
+    setForm({ name: ep.name, baseUrl: ep.baseUrl, apiKey: "", model: ep.model });
+    setSavedError(null);
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = async (id: string) => {
     const next = endpoints.filter((e) => e.id !== id);
-    saveEndpoints(next);
-    setEndpoints(next);
-    if (activeId === id) {
-      saveActiveEndpointId(null);
-      setActiveId(null);
-    }
-    if (editId === id) {
-      setEditId(null);
-      setForm({ name: "", baseUrl: "", apiKey: "", model: "" });
+    try {
+      await saveEndpoints(next);
+      setEndpoints(loadEndpoints());
+      if (activeId === id) {
+        saveActiveEndpointId(null);
+        setActiveId(null);
+      }
+      if (editId === id) {
+        setEditId(null);
+        setForm({ name: "", baseUrl: "", apiKey: "", model: "" });
+      }
+      setSavedError(null);
+    } catch {
+      setSavedError("No se pudo actualizar la lista de endpoints. Inténtalo de nuevo.");
     }
   };
 
@@ -84,6 +115,7 @@ export default function SettingsPanel({ open, onClose }: Props) {
     if (editId) {
       setEditId(null);
       setForm({ name: "", baseUrl: "", apiKey: "", model: "" });
+      setSavedError(null);
       return;
     }
     onClose();
@@ -100,7 +132,9 @@ export default function SettingsPanel({ open, onClose }: Props) {
           <div key={ep.id} className={`settings-row${aid === ep.id ? " is-active" : ""}`}>
             <div className="settings-row-info">
               <span className="settings-row-name">{ep.name}</span>
-              <span className="settings-row-meta">{ep.baseUrl} · {ep.model}</span>
+              <span className="settings-row-meta">
+                {ep.baseUrl} · {ep.model} · {ep.hasKey ? "🔑 configurada" : "sin clave"}
+              </span>
             </div>
             <div className="settings-row-actions">
               <button type="button" className="btn btn-secondary" onClick={() => onSelect(ep.id)}>Usar</button>
@@ -114,6 +148,7 @@ export default function SettingsPanel({ open, onClose }: Props) {
   }
 
   function EndpointForm({ form: f, onChange, editId: eid }: { form: { name: string; baseUrl: string; apiKey: string; model: string }; onChange: (k: string, v: string) => void; editId: string | null; }) {
+    const showHttpWarn = needsHttpWarning(f.baseUrl);
     return (
       <div className="settings-form">
         <p className="settings-section-title">{eid ? "Editar endpoint" : "Nuevo endpoint"}</p>
@@ -139,6 +174,11 @@ export default function SettingsPanel({ open, onClose }: Props) {
               placeholder="https://api.openai.com/v1"
               onChange={(e) => onChange("baseUrl", e.target.value)}
             />
+            {showHttpWarn && (
+              <p className="hint hint-warn" role="status">
+                ⚠ El endpoint no es HTTPS: la API key viajaría sin cifrar por la red. Usa HTTPS o localhost.
+              </p>
+            )}
           </div>
         </fieldset>
         <fieldset className="settings-fieldset">
@@ -151,8 +191,9 @@ export default function SettingsPanel({ open, onClose }: Props) {
                 className="settings-input"
                 type="password"
                 value={f.apiKey}
-                placeholder="sk-…"
+                placeholder={eid ? "dejar igual para conservar la clave actual" : "sk-…"}
                 onChange={(e) => onChange("apiKey", e.target.value)}
+                autoComplete="off"
               />
             </div>
             <div className="settings-field">
@@ -182,13 +223,20 @@ export default function SettingsPanel({ open, onClose }: Props) {
           <button type="button" className="btn btn-ghost btn-icon" aria-label="Cerrar configuración" onClick={onClose}>✕</button>
         </div>
         <div className="settings-body">
+          <section className="settings-disclaimer">
+            <p className="settings-section-title">🔐 Privacidad y seguridad</p>
+            <p className="hint">
+              Tus API keys se cifran (AES-GCM) y se guardan SOLO en tu navegador. DiffTyper no tiene servidor: no recibe, no procesa y no conserva ningún dato tuyo. Las solicitudes van únicamente al endpoint que tú configures, con cabeceras seguras (sin referrer, sin credenciales, sin caché).
+            </p>
+          </section>
           <EndpointList endpoints={endpoints} activeId={activeId} onSelect={handleSelect} onEdit={handleEdit} onRemove={handleRemove} />
           <EndpointForm form={form} onChange={(k, v) => setForm((p) => ({ ...p, [k]: v }))} editId={editId} />
         </div>
         <div className="settings-footer">
           {saved && <span className="settings-saved" aria-live="polite">Guardado ✓</span>}
+          {savedError && <span className="settings-error" aria-live="assertive">{savedError}</span>}
           <button type="button" className="btn btn-ghost" onClick={handleCancel}>Cancelar</button>
-          <button type="button" className="btn btn-primary" onClick={handleSave}>{editId ? "Guardar" : "Agregar"}</button>
+          <button type="button" className="btn btn-primary" onClick={() => void handleSave()}>{editId ? "Guardar" : "Agregar"}</button>
         </div>
       </div>
     </div>

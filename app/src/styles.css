@@ -1063,6 +1063,35 @@ body::before {
   font-weight: 600;
 }
 
+.settings-error {
+  margin-right: auto;
+  color: var(--error);
+  font-size: 0.85rem;
+  font-weight: 600;
+  max-width: 55%;
+}
+
+.settings-disclaimer {
+  background: var(--panel-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.settings-disclaimer .settings-section-title {
+  margin-bottom: var(--space-2);
+}
+
+.settings-disclaimer .hint {
+  margin: 0;
+  line-height: 1.55;
+}
+
+.hint-warn {
+  color: var(--error);
+}
+
 /* ——— HowToUse (D15) ——— */
 .help-fab {
   position: fixed;
