@@ -56,6 +56,15 @@ node /ruta/a/DiffTyper/cli/index.js init
 # ej. mac: node ~/Desktop/Proyect/DiffTyper/cli/index.js init
 ```
 
+### ¿Qué hace `difftyper init`?
+
+Al ejecutarlo, `difftyper init`:
+
+1. **Requiere que el proyecto sea un repositorio git** — la detección de cambios es basada en diffs, así que corre `git init` primero si tu carpeta aún no lo es (el CLI te lo avisa)
+2. **Captura el checkpoint del HEAD actual** — el diff de todo lo que no está commiteado: archivos modificados, staged y untracked
+3. **Filtra archivos de ruido** — `.gitignore`, lockfiles, `node_modules/`, `.env`… nadie quiere tipear eso
+4. **Guarda el diff** en `.difftyper/changes.diff` y agrega `.difftyper/` al `.gitignore` del repo (lo crea si no existe)
+
 | Comando | Qué hace |
 |---|---|
 | `difftyper init` | Genera `.difftyper/changes.diff` desde `git diff HEAD` (tus cambios pendientes) y agrega `.difftyper/` al `.gitignore` del repo (lo crea si no existe) |

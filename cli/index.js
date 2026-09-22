@@ -187,7 +187,7 @@ function runInit(args, isInit) {
 
   const gitCheck = spawnSync('git', ['rev-parse', '--is-inside-work-tree']);
   if (gitCheck.error || gitCheck.stdout.toString().trim() !== 'true') {
-    console.error(`${RED}✖ No estás dentro de un repositorio git. Ejecuta primero: git init${RESET}`);
+    console.error(`${RED}✖ No estás dentro de un repositorio git. La detección de cambios es basada en diffs: corre git init primero y luego difftyper init${RESET}`);
     process.exit(1);
   }
 
